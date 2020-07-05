@@ -13,7 +13,7 @@ namespace QuickSocket
 
         Socket Main;
         SocketEventPool SocketEventPool;
-        BufferManager bufferManager;
+        //BufferManager bufferManager;
         List<AsyncUserToken> Clients;
 
         public delegate void OnClientChange(int client_num, AsyncUserToken client);
@@ -28,8 +28,8 @@ namespace QuickSocket
             Main.Listen(capacity);
             SocketEventPool = new SocketEventPool(capacity);
             Clients = new List<AsyncUserToken>();
-            bufferManager = new BufferManager(capacity * bufferSize * 2, bufferSize);
-            bufferManager.InitBuffer();
+            //bufferManager = new BufferManager(capacity * bufferSize * 2, bufferSize);
+            //bufferManager.InitBuffer();
             SocketAsyncEventArgs readWriteEventArg;
 
             for (int i = 0; i < capacity; i++)
@@ -37,7 +37,7 @@ namespace QuickSocket
                 readWriteEventArg = new SocketAsyncEventArgs();
                 readWriteEventArg.Completed += IO_Completed;
                 readWriteEventArg.UserToken = new AsyncUserToken();
-                bufferManager.SetBuffer(readWriteEventArg);
+                //bufferManager.SetBuffer(readWriteEventArg);
                 SocketEventPool.Push(readWriteEventArg);
             }
 
@@ -71,17 +71,22 @@ namespace QuickSocket
             try
             {
                 SocketAsyncEventArgs readEventArgs = SocketEventPool.Pop();
-                AsyncUserToken userToken = (AsyncUserToken)readEventArgs.UserToken;
-                userToken.Socket = e.AcceptSocket;
-                userToken.ConnectTime = DateTime.Now;
-                userToken.Remote = e.AcceptSocket.RemoteEndPoint;
-                userToken.Port = ((IPEndPoint)(e.AcceptSocket.RemoteEndPoint)).Port;
-                lock (Clients) { Clients.Add(userToken); }
-
-                ClientChange?.Invoke(Clients.Count, userToken);
-                if (!e.AcceptSocket.ReceiveAsync(readEventArgs))
+                AsyncUserToken userToken = readEventArgs.UserToken as AsyncUserToken;
+                if (userToken != null)
                 {
-                    ProcessReceive(readEventArgs);
+                    userToken.Socket = e.AcceptSocket;
+                    userToken.ConnectTime = DateTime.Now;
+                    userToken.Remote = e.AcceptSocket.RemoteEndPoint;
+                    userToken.Port = ((IPEndPoint)(e.AcceptSocket.RemoteEndPoint)).Port;
+                    lock (Clients)
+                    {
+                        Clients.Add(userToken);
+                    }
+                    ClientChange?.Invoke(Clients.Count, userToken);
+                    if (!e.AcceptSocket.ReceiveAsync(readEventArgs))
+                    {
+                        ProcessReceive(readEventArgs);
+                    }
                 }
             }
             catch (Exception ex)
@@ -89,7 +94,8 @@ namespace QuickSocket
                 Console.WriteLine(ex.ToString());
             }
 
-            if (e.SocketError == SocketError.OperationAborted) return;
+            if (e.SocketError == SocketError.OperationAborted)
+                return;
             StartAccept(e);
         }
 
@@ -100,9 +106,9 @@ namespace QuickSocket
                 case SocketAsyncOperation.Receive:
                     ProcessReceive(e);
                     break;
-                case SocketAsyncOperation.Send:
-                    //ProcessSend(e);
-                    break;
+                //case SocketAsyncOperation.Send:
+                //ProcessSend(e);
+                //break;
                 default:
                     throw new ArgumentException("套接字上完成的最后一个操作不是接收或发送");
             }
@@ -112,8 +118,8 @@ namespace QuickSocket
         {
             try
             {
-                AsyncUserToken token = (AsyncUserToken)e.UserToken;
-                if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
+                AsyncUserToken token = e.UserToken as AsyncUserToken;
+                if (token != null && e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
                     byte[] data = new byte[e.BytesTransferred];
                     Array.Copy(e.Buffer, e.Offset, data, 0, e.BytesTransferred);
@@ -143,10 +149,15 @@ namespace QuickSocket
             try
             {
                 token.Socket.Shutdown(SocketShutdown.Both);
+
             }
             catch { }
-            token.Socket.Close();
-            token.Socket = null;
+            if (token != null && token.Socket != null)
+            {
+                token.Socket.Close();
+                token.Socket.Dispose();
+                token.Socket = null;
+            }
             ClientChange?.Invoke(Clients.Count, token);
             e.UserToken = new AsyncUserToken();
             SocketEventPool.Push(e);
