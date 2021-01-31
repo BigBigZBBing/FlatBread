@@ -1,0 +1,95 @@
+{
+  "version": 3,
+  "targets": {
+    "net5.0": {
+      "FlatBread/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v5.0",
+        "compile": {
+          "bin/placeholder/FlatBread.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/FlatBread.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "FlatBread/1.0.0": {
+      "type": "project",
+      "path": "../FlatBread/FlatBread.csproj",
+      "msbuildProject": "../FlatBread/FlatBread.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net5.0": [
+      "FlatBread >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\zbb58\\.nuget\\packages\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\SocketEvent\\TcpExample\\TcpExample.csproj",
+      "projectName": "TcpExample",
+      "projectPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\SocketEvent\\TcpExample\\TcpExample.csproj",
+      "packagesPath": "C:\\Users\\zbb58\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\SocketEvent\\TcpExample\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\zbb58\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net5.0"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Users\\zbb58\\source\\repos\\zbb5896\\Local.Nuget": {},
+        "https://nuget.cdn.azure.cn/v3/index.json": {}
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "netcoreapp5.0",
+          "projectReferences": {
+            "C:\\Users\\zbb58\\source\\repos\\zbb5896\\SocketEvent\\FlatBread\\FlatBread.csproj": {
+              "projectPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\SocketEvent\\FlatBread\\FlatBread.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "net5.0": {
+        "targetAlias": "netcoreapp5.0",
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.102\\RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
