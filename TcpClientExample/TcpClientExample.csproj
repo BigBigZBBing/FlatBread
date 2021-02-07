@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Inherit\AsyncEventDriver.cs" />
-    <Compile Remove="Inherit\SocketAsyncEventArgsPool.cs" />
+    <ProjectReference Include="..\FlatBread\FlatBread.csproj" />
   </ItemGroup>
 
 </Project>

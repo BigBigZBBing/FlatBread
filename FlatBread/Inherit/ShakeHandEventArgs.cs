@@ -6,24 +6,24 @@ using System.Text;
 
 namespace FlatBread.Inherit
 {
-    public class AcceptEventArgs : SocketAsyncEventArgs
+    public class ShakeHandEventArgs : SocketAsyncEventArgs
     {
         /// <summary>
         /// 接收使用的接套字
         /// </summary>
-        public OperationEventArgs ReceiveEventArgs { get; set; }
+        internal ReceiveEventArgs ReceiveEventArgs { get; set; }
 
         /// <summary>
         /// 发送使用的接套字
         /// </summary>
-        public OperationEventArgs SendEventArgs { get; set; }
+        internal SendEventArgs SendEventArgs { get; set; }
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="ReceiveEventArgs">接收使用的接套字</param>
         /// <param name="SendEventArgs">发送使用的接套字</param>
-        public AcceptEventArgs(OperationEventArgs ReceiveEventArgs, OperationEventArgs SendEventArgs)
+        internal ShakeHandEventArgs(ReceiveEventArgs ReceiveEventArgs, SendEventArgs SendEventArgs)
         {
             this.ReceiveEventArgs = ReceiveEventArgs;
             this.SendEventArgs = SendEventArgs;
@@ -32,7 +32,7 @@ namespace FlatBread.Inherit
         /// <summary>
         /// 清理缓存
         /// </summary>
-        public void Clear()
+        internal void Clear()
         {
             base.AcceptSocket?.Close();
             base.AcceptSocket?.Dispose();

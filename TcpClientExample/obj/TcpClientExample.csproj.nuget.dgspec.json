@@ -1,7 +1,7 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpExample\\TcpExample.csproj": {}
+    "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpClientExample\\TcpClientExample.csproj": {}
   },
   "projects": {
     "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\FlatBread\\FlatBread.csproj": {
@@ -62,14 +62,14 @@
         }
       }
     },
-    "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpExample\\TcpExample.csproj": {
+    "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpClientExample\\TcpClientExample.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpExample\\TcpExample.csproj",
-        "projectName": "TcpExample",
-        "projectPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpExample\\TcpExample.csproj",
+        "projectUniqueName": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpClientExample\\TcpClientExample.csproj",
+        "projectName": "TcpClientExample",
+        "projectPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpClientExample\\TcpClientExample.csproj",
         "packagesPath": "C:\\Users\\zbb58\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpExample\\obj\\",
+        "outputPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpClientExample\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

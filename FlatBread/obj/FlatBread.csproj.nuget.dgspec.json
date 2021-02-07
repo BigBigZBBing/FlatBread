@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\zbb58\\source\\repos\\zbb5896\\SocketEvent\\FlatBread\\FlatBread.csproj": {}
+    "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\FlatBread\\FlatBread.csproj": {}
   },
   "projects": {
-    "C:\\Users\\zbb58\\source\\repos\\zbb5896\\SocketEvent\\FlatBread\\FlatBread.csproj": {
+    "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\FlatBread\\FlatBread.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\SocketEvent\\FlatBread\\FlatBread.csproj",
+        "projectUniqueName": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\FlatBread\\FlatBread.csproj",
         "projectName": "FlatBread",
-        "projectPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\SocketEvent\\FlatBread\\FlatBread.csproj",
+        "projectPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\FlatBread\\FlatBread.csproj",
         "packagesPath": "C:\\Users\\zbb58\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\SocketEvent\\FlatBread\\obj\\",
+        "outputPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\FlatBread\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

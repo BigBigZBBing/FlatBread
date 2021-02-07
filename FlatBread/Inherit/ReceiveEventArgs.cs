@@ -1,4 +1,4 @@
-﻿using FlatBread.User;
+﻿using FlatBread.Session;
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
@@ -10,8 +10,9 @@ namespace FlatBread.Inherit
     /// <summary>
     /// 操作行为使用的接套字
     /// </summary>
-    public class OperationEventArgs : SocketAsyncEventArgs
+    public class ReceiveEventArgs : SocketAsyncEventArgs
     {
+
         /// <summary>
         /// 解封包
         /// </summary>
@@ -19,9 +20,9 @@ namespace FlatBread.Inherit
         /// <param name="OnReceive"></param>
         /// <param name="bytes"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Decode(int BufferSize, Action<byte[]> bytes)
+        internal void Decode(int BufferSize, Action<byte[]> bytes)
         {
-            UserTokenInfo UserToken = this.UserToken as UserTokenInfo;
+            UserTokenSession UserToken = this.UserToken as UserTokenSession;
             //所有的字节流
             Memory<byte> all = MemoryBuffer.Slice(0, BytesTransferred > BufferSize ? BufferSize : BytesTransferred);
             int offset = 0;

@@ -1,11 +1,30 @@
 {
   "version": 3,
   "targets": {
-    "net5.0": {}
+    "net5.0": {
+      "FlatBread/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v5.0",
+        "compile": {
+          "bin/placeholder/FlatBread.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/FlatBread.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "FlatBread/1.0.0": {
+      "type": "project",
+      "path": "../FlatBread/FlatBread.csproj",
+      "msbuildProject": "../FlatBread/FlatBread.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net5.0": []
+    "net5.0": [
+      "FlatBread >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\zbb58\\.nuget\\packages\\": {},
@@ -14,11 +33,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\FlatBread\\FlatBread.csproj",
-      "projectName": "FlatBread",
-      "projectPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\FlatBread\\FlatBread.csproj",
+      "projectUniqueName": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpClientExample\\TcpClientExample.csproj",
+      "projectName": "TcpClientExample",
+      "projectPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpClientExample\\TcpClientExample.csproj",
       "packagesPath": "C:\\Users\\zbb58\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\FlatBread\\obj\\",
+      "outputPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpClientExample\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -38,7 +57,11 @@
       "frameworks": {
         "net5.0": {
           "targetAlias": "netcoreapp5.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\FlatBread\\FlatBread.csproj": {
+              "projectPath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\FlatBread\\FlatBread.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

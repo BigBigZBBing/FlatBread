@@ -1,5 +1,6 @@
 ﻿using FlatBread.Tcp;
 using System;
+using System.Text;
 
 namespace TcpExample
 {
@@ -10,13 +11,13 @@ namespace TcpExample
             TcpServer tcpServer = new TcpServer(5656);
             tcpServer.Host = "127.0.0.1";
             tcpServer.MaxConnect = 200;
-            tcpServer.Open();
+            tcpServer.StartServer();
 
             tcpServer.OnConnect = (user) =>
             {
                 Console.WriteLine("UserCode:" + user.UserCode);
                 Console.WriteLine("UserHost:" + user.UserHost);
-                Console.WriteLine("UserId:" + user.UserId);
+                Console.WriteLine("UserId:" + user.UserName);
                 Console.WriteLine("UserPort:" + user.UserPort);
                 Console.WriteLine("==================Login===================");
             };
@@ -30,10 +31,11 @@ namespace TcpExample
             {
                 Console.WriteLine("UserCode:" + user.UserCode);
                 Console.WriteLine("UserHost:" + user.UserHost);
-                Console.WriteLine("UserId:" + user.UserId);
+                Console.WriteLine("UserId:" + user.UserName);
                 Console.WriteLine("UserPort:" + user.UserPort);
                 Console.WriteLine("==================Exit===================");
             };
+
             Console.ReadLine();
         }
     }
