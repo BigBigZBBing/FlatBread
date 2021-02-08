@@ -1,4 +1,5 @@
-﻿using FlatBread.Enum;
+﻿using FlatBread.Buffer;
+using FlatBread.Enum;
 using FlatBread.Inherit;
 using FlatBread.Session;
 using System;
@@ -6,7 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 
 namespace FlatBread.Session
 {
@@ -44,22 +47,36 @@ namespace FlatBread.Session
         /// </summary>
         internal ShakeHandEventArgs ShakeHandEvent { get; set; }
 
+        private Packet _Cache;
         /// <summary>
-        /// 暂存消息(会话级)
+        /// 暂存消息包
         /// </summary>
-        internal Memory<byte> DecodeQueue { get; set; }
+        internal Packet Cache
+        {
+            get
+            {
+                if (_Cache == null)
+                {
+                    _Cache = new Packet();
+                }
+                return _Cache;
+            }
+            set
+            {
+                _Cache = value;
+            }
+        }
+
 
         /// <summary>
         /// 清空缓存
         /// </summary>
         internal void Clear()
         {
-            UserName = null;
             UserCode = null;
             UserHost = null;
             UserPort = null;
             OperationTime = null;
-            DecodeQueue = Memory<byte>.Empty;
             ShakeHandEvent.Clear();
         }
 
@@ -67,11 +84,12 @@ namespace FlatBread.Session
         /// 发送消息
         /// </summary>
         /// <param name="message"></param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void SendMessage(string message)
         {
             byte[] content = Encoding.UTF8.GetBytes(message);
             ShakeHandEvent.SendEventArgs.Encode(content);
-            Channel.SendAsync(ShakeHandEvent.SendEventArgs);
+            Channel.Send(ShakeHandEvent.SendEventArgs.MemoryBuffer.Span);
         }
     }
 }

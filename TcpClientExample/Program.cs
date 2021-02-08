@@ -14,12 +14,20 @@ namespace TcpClientExample
             {
                 Console.WriteLine(bytes.Length);
             };
-            var session = tcpClient.StartConnect();
-            while (true)
+            tcpClient.StartConnect();
+
+            tcpClient.OnConnect = (session) =>
             {
-                string text = Console.ReadLine();
-                session.SendMessage(text);
-            }
+                Random random = new Random();
+
+                while (true)
+                {
+                    string text = "测试数据" + random.Next(0, int.MaxValue);
+                    session.SendMessage(text);
+                    Console.WriteLine(text);
+                }
+
+            };
 
             Console.ReadLine();
         }

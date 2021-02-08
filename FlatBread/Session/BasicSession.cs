@@ -9,11 +9,6 @@ namespace FlatBread.Session
     public abstract class BasicSession
     {
         /// <summary>
-        /// 用户端自定义的命名
-        /// </summary>
-        public string UserName { get; set; } = "Anonymity";
-
-        /// <summary>
         /// 用户端的唯一编码
         /// </summary>
         public string UserCode { get; set; } = Guid.NewGuid().ToString("D");

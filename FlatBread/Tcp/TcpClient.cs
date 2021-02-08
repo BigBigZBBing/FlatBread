@@ -78,7 +78,7 @@ namespace FlatBread.Tcp
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UserTokenSession StartConnect()
+        public void StartConnect()
         {
             Socket Client = new Socket(AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             var address = Dns.GetHostAddresses(Host);
@@ -86,9 +86,6 @@ namespace FlatBread.Tcp
 
             //优先初始化用户信息
             UserTokenSession Session = new UserTokenSession();
-            if (UserName != null) Session.UserName = UserName;
-            Session.UserHost = Host;
-            Session.UserPort = Port;
             Session.ShakeHandEvent = ShakeHandEvent;
             ShakeHandEvent.UserToken = Session;
             ShakeHandEvent.RemoteEndPoint = new IPEndPoint(address.FirstOrDefault(), Port);
@@ -96,7 +93,6 @@ namespace FlatBread.Tcp
             {
                 ProcessConnect(ShakeHandEvent);
             }
-            return Session;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -121,11 +117,14 @@ namespace FlatBread.Tcp
             //连接服务端成功
             if (e.SocketError == SocketError.Success)
             {
-                ShakeHandEventArgs ShakeHand = e as ShakeHandEventArgs;
-                UserTokenSession Session = e.UserToken as UserTokenSession;
+                ShakeHandEventArgs ShakeHand = (ShakeHandEventArgs)e;
+                UserTokenSession Session = (UserTokenSession)e.UserToken;
                 Session.Mode = SocketMode.Client;
                 Session.OperationTime = DateTime.Now;
                 Session.ShakeHandEvent = ShakeHand;
+
+                OnConnect?.Invoke(Session);
+
                 //接收服务端传来的流
                 if (!Session.Channel.ReceiveAsync(ShakeHand.ReceiveEventArgs))
                 {
@@ -137,12 +136,12 @@ namespace FlatBread.Tcp
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void SocketAsyncReceive(SocketAsyncEventArgs e)
         {
-            ReceiveEventArgs eventArgs = e as ReceiveEventArgs;
-            UserTokenSession UserToken = eventArgs.UserToken as UserTokenSession;
+            ReceiveEventArgs eventArgs = (ReceiveEventArgs)e;
+            UserTokenSession UserToken = (UserTokenSession)eventArgs.UserToken;
             if (eventArgs.SocketError == SocketError.Success && eventArgs.BytesTransferred > 0)
             {
                 //解码回调
-                eventArgs.Decode(BufferSize, bytes => OnCallBack?.Invoke(bytes));
+                eventArgs.Decode(bytes => OnCallBack?.Invoke(bytes));
 
                 //释放行为接套字的连接(此步骤无意义,只是以防万一)
                 eventArgs.AcceptSocket = null;
@@ -160,5 +159,10 @@ namespace FlatBread.Tcp
         /// 接收结果回调
         /// </summary>
         public Action<byte[]> OnCallBack { get; set; }
+
+        /// <summary>
+        /// 连接成功回调
+        /// </summary>
+        public Action<UserTokenSession> OnConnect { get; set; }
     }
 }

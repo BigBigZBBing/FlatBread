@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using FlatBread.Session;
+using FlatBread.Enum;
 
 namespace FlatBread.Tcp
 {
@@ -130,12 +131,13 @@ namespace FlatBread.Tcp
             {
                 //创建会话信息(当前会话)
                 UserTokenSession UserToken = eventArgs.UserToken as UserTokenSession;
-                UserToken.OperationTime = DateTime.Now;
                 var EndPoint = (IPEndPoint)eventArgs.AcceptSocket.RemoteEndPoint;
                 var AllHost = Dns.GetHostEntry(EndPoint.Address).AddressList;
                 UserToken.UserHost = string.Join('|', AllHost.Select(x => x.ToString()).ToArray());
                 UserToken.UserPort = ((IPEndPoint)(eventArgs.AcceptSocket.RemoteEndPoint)).Port;
+                UserToken.Mode = SocketMode.Server;
                 UserToken.ShakeHandEvent = eventArgs;
+                UserToken.OperationTime = DateTime.Now;
                 OnConnect?.Invoke(UserToken);
 
                 //异步接收客户端行为
@@ -187,7 +189,7 @@ namespace FlatBread.Tcp
             if (eventArgs.SocketError == SocketError.Success && eventArgs.BytesTransferred > 0)
             {
                 //解码回调
-                eventArgs.Decode(BufferSize, bytes => OnReceive?.Invoke(UserToken, bytes));
+                eventArgs.Decode(bytes => OnReceive?.Invoke(UserToken, bytes));
 
                 //释放行为接套字的连接(此步骤无意义,只是以防万一)
                 eventArgs.AcceptSocket = null;

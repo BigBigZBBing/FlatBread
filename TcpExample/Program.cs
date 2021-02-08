@@ -17,21 +17,19 @@ namespace TcpExample
             {
                 Console.WriteLine("UserCode:" + user.UserCode);
                 Console.WriteLine("UserHost:" + user.UserHost);
-                Console.WriteLine("UserId:" + user.UserName);
                 Console.WriteLine("UserPort:" + user.UserPort);
                 Console.WriteLine("==================Login===================");
             };
 
             tcpServer.OnReceive = (channel, bytes) =>
             {
-                Console.WriteLine(bytes.Length);
+                Console.WriteLine($"内容:{Encoding.UTF8.GetString(bytes)} 长度:{bytes.Length}");
             };
 
             tcpServer.OnExit = (user) =>
             {
                 Console.WriteLine("UserCode:" + user.UserCode);
                 Console.WriteLine("UserHost:" + user.UserHost);
-                Console.WriteLine("UserId:" + user.UserName);
                 Console.WriteLine("UserPort:" + user.UserPort);
                 Console.WriteLine("==================Exit===================");
             };

@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlatBread", "FlatBread\Flat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TcpExample", "TcpExample\TcpExample.csproj", "{F39511EA-3BE0-4006-8C7C-F7007DE7CFEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpClientExample", "TcpClientExample\TcpClientExample.csproj", "{E0A4F413-F18C-4464-8F51-0F9C6EE5E23D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TcpClientExample", "TcpClientExample\TcpClientExample.csproj", "{E0A4F413-F18C-4464-8F51-0F9C6EE5E23D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
