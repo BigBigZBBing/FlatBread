@@ -12,7 +12,7 @@ namespace FlatBread.Inherit
     /// </summary>
     internal class SendEventArgs : SocketAsyncEventArgs
     {
-        //压封包
+        //消息封包
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Encode(byte[] message)
         {
@@ -49,5 +49,32 @@ namespace FlatBread.Inherit
             //给缓冲区赋值
             packet.CopyTo(MemoryBuffer.Span);
         }
+
+        /// <summary>
+        /// 请求断开封包
+        /// </summary>
+        internal void Disconnect()
+        {
+            Span<byte> packet;
+            packet = new byte[2];
+            packet[0] = 0xFF;
+            packet[1] = 0;
+            SetBuffer(packet.ToArray());
+            packet.CopyTo(MemoryBuffer.Span);
+        }
+
+        /// <summary>
+        /// 请求重连封包
+        /// </summary>
+        internal void Reconnection()
+        {
+            Span<byte> packet;
+            packet = new byte[2];
+            packet[0] = 0xFE;
+            packet[1] = 0;
+            SetBuffer(packet.ToArray());
+            packet.CopyTo(MemoryBuffer.Span);
+        }
+
     }
 }

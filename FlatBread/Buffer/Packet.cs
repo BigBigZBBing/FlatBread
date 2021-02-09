@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlatBread.Enum;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -9,6 +10,11 @@ namespace FlatBread.Buffer
 {
     internal class Packet
     {
+        /// <summary>
+        /// 消息类型
+        /// </summary>
+        internal MessageMode Mode { get; set; }
+
         /// <summary>
         /// 包头是否完整
         /// </summary>
@@ -109,6 +115,8 @@ namespace FlatBread.Buffer
                     switch (packetType)
                     {
                         case 1: //byte 1字节
+                        case 255: //disconnect 1字节
+                        case 254: //reconnect 1字节
                             HeadTargetLength = 2;
                             break;
                         case 2: //short 2字节
@@ -119,6 +127,7 @@ namespace FlatBread.Buffer
                             break;
                     }
                     HeadCache = new byte[HeadTargetLength];
+                    Mode = (MessageMode)packetType;
                     //优先加载封包类型
                     HeadCache[0] = packetType;
                     HeadCurrentLength = 1;

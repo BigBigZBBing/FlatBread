@@ -57,6 +57,11 @@ namespace FlatBread.Tcp
         /// </summary>
         internal ShakeHandEventArgs ShakeHandEvent { get; set; }
 
+        /// <summary>
+        /// 客户端Socket
+        /// </summary>
+        internal Socket Client { get; set; }
+
         public TcpClient(string host, int port)
         {
             this.Host = host;
@@ -81,7 +86,7 @@ namespace FlatBread.Tcp
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void StartConnect()
         {
-            Socket Client = new Socket(AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            Client = new Socket(AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             var address = Dns.GetHostAddresses(Host);
             if (address.Length == 0) throw new ArgumentNullException("Host to dns analytics is null!");
 
@@ -89,7 +94,14 @@ namespace FlatBread.Tcp
             UserTokenSession Session = new UserTokenSession();
             Session.ShakeHandEvent = ShakeHandEvent;
             ShakeHandEvent.UserToken = Session;
+            ShakeHandEvent.ConnectAction = StartConnect;
             ShakeHandEvent.RemoteEndPoint = new IPEndPoint(address.FirstOrDefault(), Port);
+            ConnectAction(ShakeHandEvent);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void ConnectAction(ShakeHandEventArgs e)
+        {
             if (!Client.ConnectAsync(ShakeHandEvent))
             {
                 ProcessConnect(ShakeHandEvent);
@@ -125,6 +137,7 @@ namespace FlatBread.Tcp
                 ShakeHand.ReceiveEventArgs.UserToken = Session;
                 Session.ShakeHandEvent = ShakeHand;
 
+                //异步监听连接完成后的操作
                 ThreadPool.QueueUserWorkItem((e) => OnConnect?.Invoke(Session));
 
                 //接收服务端传来的流
@@ -143,13 +156,14 @@ namespace FlatBread.Tcp
             if (eventArgs.SocketError == SocketError.Success && eventArgs.BytesTransferred > 0)
             {
                 //解码回调
-                eventArgs.Decode(bytes => OnCallBack?.Invoke(bytes));
+                eventArgs.Decode((mode, bytes) => OnCallBack?.Invoke(bytes));
 
                 //释放行为接套字的连接(此步骤无意义,只是以防万一)
                 eventArgs.AcceptSocket = null;
 
                 //继续接收消息
-                if (!UserToken.Channel.ReceiveAsync(e))
+                if (UserToken.Channel != null
+                    && !UserToken.Channel.ReceiveAsync(e))
                 {
                     //此次接收没有接收完毕 递归接收
                     SocketAsyncReceive(e);

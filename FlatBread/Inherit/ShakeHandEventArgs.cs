@@ -19,6 +19,11 @@ namespace FlatBread.Inherit
         internal SendEventArgs SendEventArgs { get; set; }
 
         /// <summary>
+        /// 重新连接机制
+        /// </summary>
+        internal Action ConnectAction { get; set; }
+
+        /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="ReceiveEventArgs">接收使用的接套字</param>
@@ -37,6 +42,14 @@ namespace FlatBread.Inherit
             base.AcceptSocket?.Close();
             base.AcceptSocket?.Dispose();
             base.AcceptSocket = null;
+        }
+
+        /// <summary>
+        /// 重新连接
+        /// </summary>
+        internal void ReConnect()
+        {
+            ConnectAction?.Invoke();
         }
     }
 }

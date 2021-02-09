@@ -81,7 +81,7 @@ namespace FlatBread.Session
         }
 
         /// <summary>
-        /// 发送消息
+        /// 消息包
         /// </summary>
         /// <param name="message"></param>
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -90,14 +90,27 @@ namespace FlatBread.Session
             byte[] content = Encoding.UTF8.GetBytes(message);
             ShakeHandEvent.SendEventArgs.Encode(content);
             //Channel.Send(ShakeHandEvent.SendEventArgs.MemoryBuffer.Span);
-            if (!Channel.SendAsync(ShakeHandEvent.SendEventArgs))
-            {
-                //Console.WriteLine("同步发送");
-            }
-            else
-            {
-                //Console.WriteLine("异步发送");
-            }
+            Channel.SendAsync(ShakeHandEvent.SendEventArgs);
+        }
+
+        /// <summary>
+        /// 死包
+        /// </summary>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void SendDisconnect()
+        {
+            ShakeHandEvent.SendEventArgs.Disconnect();
+            Channel.SendAsync(ShakeHandEvent.SendEventArgs);
+        }
+
+        /// <summary>
+        /// 重生包
+        /// </summary>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void SendReconnect()
+        {
+            ShakeHandEvent.SendEventArgs.Reconnection();
+            Channel.SendAsync(ShakeHandEvent.SendEventArgs);
         }
     }
 }

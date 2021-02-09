@@ -189,7 +189,7 @@ namespace FlatBread.Tcp
             if (eventArgs.SocketError == SocketError.Success && eventArgs.BytesTransferred > 0)
             {
                 //解码回调
-                eventArgs.Decode(bytes => OnReceive?.Invoke(UserToken, bytes));
+                eventArgs.Decode((mode, bytes) => OnReceive?.Invoke(UserToken, bytes));
 
                 //释放行为接套字的连接(此步骤无意义,只是以防万一)
                 eventArgs.AcceptSocket = null;
