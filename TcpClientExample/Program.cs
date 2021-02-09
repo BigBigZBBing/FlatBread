@@ -1,6 +1,7 @@
 ﻿using FlatBread.Tcp;
 using System;
 using System.Text;
+using System.Threading;
 
 namespace TcpClientExample
 {
@@ -22,14 +23,26 @@ namespace TcpClientExample
 
                 while (true)
                 {
+                    Console.ReadLine();
                     string text = "测试数据" + random.Next(0, int.MaxValue);
                     session.SendMessage(text);
-                    Console.WriteLine(text);
                 }
+
+                //while (true)
+                //{
+                //    string text = "测试数据" + random.Next(0, int.MaxValue);
+                //    session.SendMessage(text);
+                //    Console.WriteLine(text);
+                //}
 
             };
 
-            Console.ReadLine();
+            tcpClient.OnCallBack = (bytes) =>
+            {
+                Console.WriteLine("返回内容:" + Encoding.UTF8.GetString(bytes)); ;
+            };
+
+            Thread.Sleep(-1);
         }
     }
 }

@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FlatBread.Tcp
@@ -121,9 +122,10 @@ namespace FlatBread.Tcp
                 UserTokenSession Session = (UserTokenSession)e.UserToken;
                 Session.Mode = SocketMode.Client;
                 Session.OperationTime = DateTime.Now;
+                ShakeHand.ReceiveEventArgs.UserToken = Session;
                 Session.ShakeHandEvent = ShakeHand;
 
-                OnConnect?.Invoke(Session);
+                ThreadPool.QueueUserWorkItem((e) => OnConnect?.Invoke(Session));
 
                 //接收服务端传来的流
                 if (!Session.Channel.ReceiveAsync(ShakeHand.ReceiveEventArgs))

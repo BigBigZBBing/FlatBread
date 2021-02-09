@@ -89,7 +89,15 @@ namespace FlatBread.Session
         {
             byte[] content = Encoding.UTF8.GetBytes(message);
             ShakeHandEvent.SendEventArgs.Encode(content);
-            Channel.Send(ShakeHandEvent.SendEventArgs.MemoryBuffer.Span);
+            //Channel.Send(ShakeHandEvent.SendEventArgs.MemoryBuffer.Span);
+            if (!Channel.SendAsync(ShakeHandEvent.SendEventArgs))
+            {
+                //Console.WriteLine("同步发送");
+            }
+            else
+            {
+                //Console.WriteLine("异步发送");
+            }
         }
     }
 }

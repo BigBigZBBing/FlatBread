@@ -24,6 +24,7 @@ namespace TcpExample
             tcpServer.OnReceive = (channel, bytes) =>
             {
                 Console.WriteLine($"内容:{Encoding.UTF8.GetString(bytes)} 长度:{bytes.Length}");
+                channel.SendMessage("服务端收到");
             };
 
             tcpServer.OnExit = (user) =>

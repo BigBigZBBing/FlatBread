@@ -11,7 +11,7 @@ namespace FlatBread.Inherit
     public class ShakeHandEventArgsPool
     {
         /// <summary>
-        /// 接收池
+        /// 握手池
         /// </summary>
         private ConcurrentStack<ShakeHandEventArgs> ShakeHandPool { get; set; }
 
