@@ -33,8 +33,8 @@ namespace FlatBread.Inherit
                 try
                 {
                     //测试服务端解析二进制流出现问题
-                    if (UserToken.Mode == SocketMode.Server)
-                        throw new Exception();
+                    //if (UserToken.Mode == SocketMode.Server)
+                    //    throw new Exception();
                     offset += UserToken.Cache.LoadHead(curBytes.Slice(offset));
                     offset += UserToken.Cache.LoadBody(curBytes.Slice(offset));
                 }
