@@ -12,6 +12,11 @@ namespace FlatBread.Inherit
     /// </summary>
     internal class SendEventArgs : SocketAsyncEventArgs
     {
+        /// <summary>
+        /// 发送回调
+        /// </summary>
+        internal Action<SocketAsyncEventArgs> SendAction { get; set; }
+
         //消息封包
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Encode(byte[] message)
@@ -53,6 +58,7 @@ namespace FlatBread.Inherit
         /// <summary>
         /// 请求断开封包
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Disconnect()
         {
             Span<byte> packet;
@@ -66,6 +72,7 @@ namespace FlatBread.Inherit
         /// <summary>
         /// 请求重连封包
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Reconnection()
         {
             Span<byte> packet;

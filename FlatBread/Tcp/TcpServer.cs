@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using FlatBread.Session;
 using FlatBread.Enum;
+using FlatBread.Buffer;
 
 namespace FlatBread.Tcp
 {
@@ -71,6 +72,11 @@ namespace FlatBread.Tcp
         internal Socket ServerSocket { get; set; }
 
         /// <summary>
+        /// 用户端接套字容器池
+        /// </summary>
+        ShakeHandEventArgsPool ShakeHandEventPool { get; set; }
+
+        /// <summary>
         /// 开启服务
         /// </summary>
         public void StartServer()
@@ -99,13 +105,10 @@ namespace FlatBread.Tcp
             LogHelper.LogInfo("容器池已加载完毕~");
 
             //3.开始调用用户端接套字容器池监听
-            ShakeHandAsync();
+            {
+                ShakeHandAsync();
+            }
         }
-
-        /// <summary>
-        /// 用户端接套字容器池
-        /// </summary>
-        ShakeHandEventArgsPool ShakeHandEventPool { get; set; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ShakeHandAsync()
@@ -117,14 +120,14 @@ namespace FlatBread.Tcp
                 LogHelper.LogWarn("异步接收用户回调失败 同步进入回调函数~");
 
                 //如果异步接收失败则同步接收
-                SocketAsyncAccept(evetArgs);
+                ProcessAccept(evetArgs);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void SocketAsyncAccept(SocketAsyncEventArgs e)
+        void ProcessAccept(SocketAsyncEventArgs e)
         {
-            ShakeHandEventArgs eventArgs = e as ShakeHandEventArgs;
+            ShakeHandEventArgs eventArgs = (ShakeHandEventArgs)e;
 
             //接收用户成功
             if (eventArgs.LastOperation == SocketAsyncOperation.Accept && eventArgs.SocketError == SocketError.Success)
@@ -136,12 +139,18 @@ namespace FlatBread.Tcp
                 UserToken.UserHost = string.Join('|', AllHost.Select(x => x.ToString()).ToArray());
                 UserToken.UserPort = ((IPEndPoint)(eventArgs.AcceptSocket.RemoteEndPoint)).Port;
                 UserToken.Mode = SocketMode.Server;
-                UserToken.ShakeHandEvent = eventArgs;
                 UserToken.OperationTime = DateTime.Now;
+                eventArgs.SendEventArgs.SendAction = ProcessSend;
+                eventArgs.ReceiveEventArgs.ReceiveAction = ProcessReceive;
+                UserToken.ShakeHandEvent = eventArgs;
                 OnConnect?.Invoke(UserToken);
 
                 //异步接收客户端行为
-                ReceiveProcess(UserToken);
+                //异步接收客户端消息
+                if (!UserToken.Channel.ReceiveAsync(UserToken.ShakeHandEvent.ReceiveEventArgs))
+                {
+                    ProcessReceive(UserToken.ShakeHandEvent.ReceiveEventArgs);
+                }
             }
             else
             {
@@ -155,14 +164,9 @@ namespace FlatBread.Tcp
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void ReceiveProcess(UserTokenSession UserToken)
+        void StartReceive(UserTokenSession UserToken)
         {
-            //异步接收客户端消息
-            if (!UserToken.ShakeHandEvent.AcceptSocket
-                    .ReceiveAsync(UserToken.ShakeHandEvent.ReceiveEventArgs))
-            {
-                SocketAsyncReceive(UserToken.ShakeHandEvent.ReceiveEventArgs);
-            }
+
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -172,24 +176,37 @@ namespace FlatBread.Tcp
             {
                 //检测到迎接行为
                 case SocketAsyncOperation.Accept:
-                    SocketAsyncAccept(e);
+                    ProcessAccept(e);
                     break;
                 //检测到输入行为
                 case SocketAsyncOperation.Receive:
-                    SocketAsyncReceive(e);
+                    ProcessReceive(e);
                     break;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void SocketAsyncReceive(SocketAsyncEventArgs e)
+        void ProcessSend(SocketAsyncEventArgs e)
         {
-            ReceiveEventArgs eventArgs = e as ReceiveEventArgs;
-            UserTokenSession UserToken = eventArgs.UserToken as UserTokenSession;
+            SendEventArgs eventArgs = (SendEventArgs)e;
+            UserTokenSession UserToken = (UserTokenSession)eventArgs.UserToken;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void ProcessReceive(SocketAsyncEventArgs e)
+        {
+            ReceiveEventArgs eventArgs = (ReceiveEventArgs)e;
+            UserTokenSession UserToken = (UserTokenSession)eventArgs.UserToken;
             if (eventArgs.SocketError == SocketError.Success && eventArgs.BytesTransferred > 0)
             {
                 //解码回调
-                eventArgs.Decode((mode, bytes) => OnReceive?.Invoke(UserToken, bytes));
+                eventArgs.Decode((packet) =>
+                {
+                    if (packet.Mode == MessageMode.MessageByte
+                    || packet.Mode == MessageMode.MessageShort
+                    || packet.Mode == MessageMode.MessageInt)
+                        OnReceive?.Invoke(UserToken, packet);
+                });
 
                 //释放行为接套字的连接(此步骤无意义,只是以防万一)
                 eventArgs.AcceptSocket = null;
@@ -198,11 +215,12 @@ namespace FlatBread.Tcp
                 if (!UserToken.Channel.ReceiveAsync(e))
                 {
                     //此次接收没有接收完毕 递归接收
-                    SocketAsyncReceive(e);
+                    ProcessReceive(e);
                 }
             }
             else
             {
+                LogHelper.LogWarn("接收到客户端未采集的状态:" + eventArgs.SocketError);
                 //客户端正常走这步
                 OnExit?.Invoke(UserToken);
                 //清理连接接套字
@@ -213,7 +231,7 @@ namespace FlatBread.Tcp
         }
 
         public Action<UserTokenSession> OnConnect { get; set; }
-        public Action<UserTokenSession, byte[]> OnReceive { get; set; }
+        public Action<UserTokenSession, Packet> OnReceive { get; set; }
         public Action<UserTokenSession> OnExit { get; set; }
     }
 }

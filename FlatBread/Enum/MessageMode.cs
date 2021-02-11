@@ -12,7 +12,9 @@ namespace FlatBread.Enum
     public enum MessageMode
     {
         None = 0,
-        Message = 1 | 2 | 3,
+        MessageByte = 1,
+        MessageShort = 2,
+        MessageInt = 3,
         Disconect = 0xFF,
         Reconnect = 0xFE,
     }

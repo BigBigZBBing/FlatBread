@@ -1,5 +1,7 @@
-﻿using FlatBread.Enum;
+﻿using FlatBread.Buffer;
+using FlatBread.Enum;
 using FlatBread.Inherit;
+using FlatBread.Log;
 using FlatBread.Session;
 using System;
 using System.Collections.Concurrent;
@@ -67,41 +69,46 @@ namespace FlatBread.Tcp
             this.Host = host;
             this.Port = port;
 
+            UserTokenSession Session = new UserTokenSession();
             //初始化发送接套字
             SendBuffer = new byte[BufferSize];
             SendEventArgs SendEvent = new SendEventArgs();
             SendEvent.Completed += AsyncDispatchCenter;
-            //发送是根据内容动态缓冲大小
+            SendEvent.UserToken = Session;
+            SendEvent.SendAction = ProcessSend;
 
             //初始化接收接套字
             ReceiveBuffer = new byte[BufferSize];
             ReceiveEventArgs ReceiveEvent = new ReceiveEventArgs();
             ReceiveEvent.Completed += AsyncDispatchCenter;
+            ReceiveEvent.UserToken = Session;
+            ReceiveEvent.ReceiveAction = ProcessReceive;
             ReceiveEvent.SetBuffer(ReceiveBuffer);
 
             ShakeHandEvent = new ShakeHandEventArgs(ReceiveEvent, SendEvent);
             ShakeHandEvent.Completed += AsyncDispatchCenter;
+            ShakeHandEvent.ConnectAction = StartConnect;
+            Session.ShakeHandEvent = ShakeHandEvent;
+            Session.Mode = SocketMode.Client;
+            ShakeHandEvent.UserToken = Session;
+        }
+
+        public IPEndPoint GetEndPoint()
+        {
+            IPAddress[] address = Dns.GetHostAddresses(Host);
+            if (address.Length == 0) throw new ArgumentNullException("Host to dns analytics is null!");
+            return new IPEndPoint(address.FirstOrDefault(), Port);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void StartConnect()
         {
             Client = new Socket(AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            var address = Dns.GetHostAddresses(Host);
-            if (address.Length == 0) throw new ArgumentNullException("Host to dns analytics is null!");
-
             //优先初始化用户信息
-            UserTokenSession Session = new UserTokenSession();
-            Session.ShakeHandEvent = ShakeHandEvent;
-            ShakeHandEvent.UserToken = Session;
-            ShakeHandEvent.ConnectAction = StartConnect;
-            ShakeHandEvent.RemoteEndPoint = new IPEndPoint(address.FirstOrDefault(), Port);
-            ConnectAction(ShakeHandEvent);
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public void ConnectAction(ShakeHandEventArgs e)
-        {
+            ShakeHandEvent.RemoteEndPoint = GetEndPoint();
+            UserTokenSession Session = (UserTokenSession)ShakeHandEvent.UserToken;
+            Console.WriteLine("Connecting.......!ConnectState:" + Session.Connecting);
+            Session.Connecting = true;
             if (!Client.ConnectAsync(ShakeHandEvent))
             {
                 ProcessConnect(ShakeHandEvent);
@@ -119,7 +126,7 @@ namespace FlatBread.Tcp
                     break;
                 //检测到接收行为
                 case SocketAsyncOperation.Receive:
-                    SocketAsyncReceive(e);
+                    ProcessReceive(e);
                     break;
             }
         }
@@ -127,46 +134,77 @@ namespace FlatBread.Tcp
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void ProcessConnect(SocketAsyncEventArgs e)
         {
-            //连接服务端成功
-            if (e.SocketError == SocketError.Success)
+            ShakeHandEventArgs eventArgs = (ShakeHandEventArgs)e;
+            UserTokenSession Session = (UserTokenSession)e.UserToken;
+            //结束连接中状态
+            Session.Connecting = false;
+            switch (eventArgs.SocketError)
             {
-                ShakeHandEventArgs ShakeHand = (ShakeHandEventArgs)e;
-                UserTokenSession Session = (UserTokenSession)e.UserToken;
-                Session.Mode = SocketMode.Client;
-                Session.OperationTime = DateTime.Now;
-                ShakeHand.ReceiveEventArgs.UserToken = Session;
-                Session.ShakeHandEvent = ShakeHand;
+                case SocketError.Success:
+                    Session.OperationTime = DateTime.Now;
 
-                //异步监听连接完成后的操作
-                ThreadPool.QueueUserWorkItem((e) => OnConnect?.Invoke(Session));
+                    //异步监听连接完成后的操作
+                    ThreadPool.QueueUserWorkItem((e) => OnConnect?.Invoke(Session));
 
-                //接收服务端传来的流
-                if (!Session.Channel.ReceiveAsync(ShakeHand.ReceiveEventArgs))
-                {
-                    SocketAsyncReceive(ShakeHand.ReceiveEventArgs);
-                }
+                    //接收服务端传来的流
+                    if (!Session.Channel.ReceiveAsync(eventArgs.ReceiveEventArgs))
+                    {
+                        ProcessReceive(eventArgs.ReceiveEventArgs);
+                    }
+
+                    //如果存在发送失败的消息 在重连之后
+                    while (Session.NoSuccessMessage.Count > 0)
+                    {
+                        if (Session.NoSuccessMessage.TryDequeue(out var message))
+                            Session.SendMessage(message);
+                    }
+                    break;
+                case SocketError.ConnectionRefused:
+                    LogHelper.LogError("服务器拒绝连接");
+                    break;
+                default:
+                    LogHelper.LogWarn("发现未采集的接套字状态:" + eventArgs.SocketError);
+                    break;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void SocketAsyncReceive(SocketAsyncEventArgs e)
+        void ProcessSend(SocketAsyncEventArgs e)
+        {
+            SendEventArgs eventArgs = (SendEventArgs)e;
+            UserTokenSession UserToken = (UserTokenSession)eventArgs.UserToken;
+            switch (eventArgs.SocketError)
+            {
+                //需要重新连接
+                case SocketError.ConnectionReset:
+                    UserToken.NoSuccessMessage.Enqueue(eventArgs.MemoryBuffer.ToArray());
+                    StartConnect();
+                    break;
+                //成功就不需要任何操作了
+                case SocketError.Success:
+                    break;
+                default:
+                    LogHelper.LogWarn("发现未采集的接套字状态:" + eventArgs.SocketError);
+                    break;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void ProcessReceive(SocketAsyncEventArgs e)
         {
             ReceiveEventArgs eventArgs = (ReceiveEventArgs)e;
             UserTokenSession UserToken = (UserTokenSession)eventArgs.UserToken;
             if (eventArgs.SocketError == SocketError.Success && eventArgs.BytesTransferred > 0)
             {
                 //解码回调
-                eventArgs.Decode((mode, bytes) => OnCallBack?.Invoke(bytes));
-
-                //释放行为接套字的连接(此步骤无意义,只是以防万一)
-                eventArgs.AcceptSocket = null;
+                eventArgs.Decode((bytes) => OnCallBack?.Invoke(UserToken, bytes));
 
                 //继续接收消息
                 if (UserToken.Channel != null
                     && !UserToken.Channel.ReceiveAsync(e))
                 {
                     //此次接收没有接收完毕 递归接收
-                    SocketAsyncReceive(e);
+                    ProcessReceive(e);
                 }
             }
         }
@@ -174,7 +212,7 @@ namespace FlatBread.Tcp
         /// <summary>
         /// 接收结果回调
         /// </summary>
-        public Action<byte[]> OnCallBack { get; set; }
+        public Action<UserTokenSession, Packet> OnCallBack { get; set; }
 
         /// <summary>
         /// 连接成功回调

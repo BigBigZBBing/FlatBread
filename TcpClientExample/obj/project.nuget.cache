@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "DEtL9P2GoP8TJjALhNTVqO2JXhMcIi1soaDsJSFW81/nsbsdIK9fVAgsbIVnDRFmVA5Jay4qyqvyOb3NJ9dh8Q==",
+  "dgSpecHash": "ZF9Nwun2TWkVx8ybQfSWmkrxxWtpRbr8KS7g81ytfsY04RoptBgYUZOz1WmFMDpdMT9N3ik6cHqJ3f+UTbMjqg==",
   "success": true,
   "projectFilePath": "C:\\Users\\zbb58\\source\\repos\\zbb5896\\FlatBread\\TcpClientExample\\TcpClientExample.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\zbb58\\.nuget\\packages\\microsoft.netcore.platforms\\5.0.0\\microsoft.netcore.platforms.5.0.0.nupkg.sha512",
+    "C:\\Users\\zbb58\\.nuget\\packages\\system.text.encoding.codepages\\5.0.0\\system.text.encoding.codepages.5.0.0.nupkg.sha512"
+  ],
   "logs": []
 }

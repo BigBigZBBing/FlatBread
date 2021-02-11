@@ -9,11 +9,12 @@ namespace TcpClientExample
     {
         static void Main(string[] args)
         {
+            RandomChinese randomChinese = new RandomChinese();
             TcpClient tcpClient = new TcpClient("127.0.0.1", 5656);
             tcpClient.UserName = "张炳彬";
-            tcpClient.OnCallBack = (bytes) =>
+            tcpClient.OnCallBack = (user, packet) =>
             {
-                Console.WriteLine(bytes.Length);
+                Console.WriteLine(packet.Length);
             };
             tcpClient.StartConnect();
 
@@ -21,25 +22,30 @@ namespace TcpClientExample
             {
                 Random random = new Random();
 
-                while (true)
-                {
-                    Console.ReadLine();
-                    string text = "测试数据" + random.Next(0, int.MaxValue);
-                    session.SendMessage(text);
-                }
-
+                //手动
                 //while (true)
                 //{
-                //    string text = "测试数据" + random.Next(0, int.MaxValue);
-                //    session.SendMessage(text);
-                //    Console.WriteLine(text);
+                //    Console.ReadLine();
+                //    string text = randomChinese.GetRandomChinese(random.Next(1, 200));
+                //    byte[] message = Encoding.UTF8.GetBytes(text);
+                //    Console.WriteLine($"发送内容长度:{message.Length}");
+                //    session.SendMessage(message);
                 //}
+
+                //自动
+                while (true)
+                {
+                    string text = randomChinese.GetRandomChinese(random.Next(1, 200));
+                    byte[] message = Encoding.UTF8.GetBytes(text);
+                    session.SendMessage(message);
+                    Thread.Sleep(100);
+                }
 
             };
 
-            tcpClient.OnCallBack = (bytes) =>
+            tcpClient.OnCallBack = (user, packet) =>
             {
-                Console.WriteLine("返回内容:" + Encoding.UTF8.GetString(bytes)); ;
+                Console.WriteLine("返回内容:" + Encoding.UTF8.GetString(packet)); ;
             };
 
             Thread.Sleep(-1);

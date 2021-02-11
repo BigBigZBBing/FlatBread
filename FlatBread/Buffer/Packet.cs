@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FlatBread.Buffer
 {
-    internal class Packet
+    public class Packet
     {
         /// <summary>
         /// 消息类型
@@ -18,47 +18,47 @@ namespace FlatBread.Buffer
         /// <summary>
         /// 包头是否完整
         /// </summary>
-        internal bool HasHeader { get { return HeadTargetLength > -1 && HeadTargetLength == HeadCurrentLength; } }
+        bool HasHeader { get { return HeadTargetLength > -1 && HeadTargetLength == HeadCurrentLength; } }
 
         /// <summary>
         /// 包头的目标长度
         /// </summary>
-        internal int HeadTargetLength { get; set; }
+        int HeadTargetLength { get; set; }
 
         /// <summary>
         /// 包头的当前长度
         /// </summary>
-        internal int HeadCurrentLength { get; set; }
+        int HeadCurrentLength { get; set; }
 
         /// <summary>
         /// 包头缓存
         /// </summary>
-        internal byte[] HeadCache { get; set; }
+        byte[] HeadCache { get; set; }
 
         /// <summary>
         /// 包体是否完整
         /// </summary>
-        internal bool HasBody { get { return BodyTargetLength > -1 && BodyTargetLength == BodyCurrentLength; } }
+        bool HasBody { get { return BodyTargetLength > -1 && BodyTargetLength == BodyCurrentLength; } }
 
         /// <summary>
         /// 包体的目标长度
         /// </summary>
-        internal int BodyTargetLength { get; set; }
+        int BodyTargetLength { get; set; }
 
         /// <summary>
         /// 包体的当前长度
         /// </summary>
-        internal int BodyCurrentLength { get; set; }
+        int BodyCurrentLength { get; set; }
 
         /// <summary>
         /// 封包缓存
         /// </summary>
-        internal List<byte[]> Cache { get; set; }
+        List<byte[]> Cache { get; set; }
 
         /// <summary>
         /// 封包所有内容
         /// </summary>
-        internal byte[] PacketContent { get; set; }
+        byte[] PacketContent { get; set; }
 
         internal Packet()
         {
@@ -192,5 +192,10 @@ namespace FlatBread.Buffer
         /// </summary>
         /// <param name="packet"></param>
         public static implicit operator byte[](Packet packet) => packet.PacketContent;
+
+        /// <summary>
+        /// 内容长度
+        /// </summary>
+        public int? Length { get { return PacketContent?.Length; } }
     }
 }

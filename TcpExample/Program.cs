@@ -21,12 +21,11 @@ namespace TcpExample
                 Console.WriteLine("==================Login===================");
             };
 
-            tcpServer.OnReceive = (channel, bytes) =>
+            tcpServer.OnReceive = (user, packet) =>
             {
-                Console.WriteLine($"内容:{Encoding.UTF8.GetString(bytes)} 长度:{bytes.Length}");
-                channel.SendMessage("服务端收到");
+                Console.WriteLine($"内容:{Encoding.UTF8.GetString(packet)} 长度:{packet.Length}");
+                user.SendMessage(Encoding.UTF8.GetBytes("服务端收到"));
             };
-
             tcpServer.OnExit = (user) =>
             {
                 Console.WriteLine("UserCode:" + user.UserCode);

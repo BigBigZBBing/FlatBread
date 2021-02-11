@@ -17,13 +17,17 @@ namespace FlatBread.Inherit
     /// </summary>
     public class ReceiveEventArgs : SocketAsyncEventArgs
     {
+        /// <summary>
+        /// 接收回调
+        /// </summary>
+        internal Action<SocketAsyncEventArgs> ReceiveAction { get; set; }
 
         /// <summary>
         /// 解封包
         /// </summary>
-        /// <param name="bytes"></param>
+        /// <param name="callback"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void Decode(Action<MessageMode, byte[]> bytes)
+        internal void Decode(Action<Packet> callback)
         {
             UserTokenSession UserToken = this.UserToken as UserTokenSession;
             int offset = 0;
@@ -47,20 +51,22 @@ namespace FlatBread.Inherit
 
                 if (UserToken.Cache.IsCompleted())
                 {
-                    PacketCommand(bytes);
+                    PacketCommand(callback);
                 }
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool PacketCommand(Action<MessageMode, byte[]> bytes)
+        bool PacketCommand(Action<Packet> bytes)
         {
             UserTokenSession UserToken = this.UserToken as UserTokenSession;
             switch (UserToken.Cache.Mode)
             {
                 //如果是消息包就回调
-                case MessageMode.Message:
-                    bytes?.Invoke(UserToken.Cache.Mode, UserToken.Cache);
+                case MessageMode.MessageByte:
+                case MessageMode.MessageShort:
+                case MessageMode.MessageInt:
+                    bytes?.Invoke(UserToken.Cache);
                     break;
                 //如果是请求断开
                 case MessageMode.Disconect:
@@ -76,7 +82,7 @@ namespace FlatBread.Inherit
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void SocketDisconect()
+        void SocketDisconect()
         {
             UserTokenSession UserToken = this.UserToken as UserTokenSession;
             switch (UserToken.Mode)
@@ -92,7 +98,7 @@ namespace FlatBread.Inherit
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void SocketReconect()
+        void SocketReconect()
         {
             UserTokenSession UserToken = this.UserToken as UserTokenSession;
             switch (UserToken.Mode)
