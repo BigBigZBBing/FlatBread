@@ -51,18 +51,12 @@ namespace FlatBread.Buffer
         int BodyCurrentLength { get; set; }
 
         /// <summary>
-        /// 封包缓存
-        /// </summary>
-        List<byte[]> Cache { get; set; }
-
-        /// <summary>
         /// 封包所有内容
         /// </summary>
-        byte[] PacketContent { get; set; }
+        Memory<byte> PacketContent { get; set; }
 
         internal Packet()
         {
-            Cache = new List<byte[]>();
             HeadTargetLength = -1;
             HeadCurrentLength = -1;
             BodyTargetLength = -1;
@@ -151,22 +145,20 @@ namespace FlatBread.Buffer
             if (!HasBody && stream.Length > 0)
             {
                 //初始化包体
-                if (PacketContent == null)
+                if (PacketContent.IsEmpty)
                     PacketContent = new byte[BodyTargetLength];
 
                 //可以一次性读完
                 var residue = BodyTargetLength - BodyCurrentLength;
                 if (stream.Length >= residue)
                 {
-                    stream.Slice(0, residue).ToArray()
-                        .CopyTo(PacketContent, BodyCurrentLength);
+                    stream.Slice(0, residue).CopyTo(PacketContent.Slice(BodyCurrentLength).Span);
                     BodyCurrentLength = BodyTargetLength;
                     Offset += residue;
                 }
                 else
                 {
-                    stream.Slice(0, stream.Length).ToArray()
-                        .CopyTo(PacketContent, BodyCurrentLength);
+                    stream.Slice(0, stream.Length).CopyTo(PacketContent.Slice(BodyCurrentLength).Span);
                     BodyCurrentLength += stream.Length;
                     Offset += stream.Length;
                 }
@@ -191,11 +183,11 @@ namespace FlatBread.Buffer
         /// 重载隐式转换
         /// </summary>
         /// <param name="packet"></param>
-        public static implicit operator byte[](Packet packet) => packet.PacketContent;
+        public static implicit operator byte[](Packet packet) => packet.PacketContent.ToArray();
 
         /// <summary>
         /// 内容长度
         /// </summary>
-        public int? Length { get { return PacketContent?.Length; } }
+        public int? Length { get { return PacketContent.Length; } }
     }
 }

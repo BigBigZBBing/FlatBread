@@ -26,7 +26,7 @@ namespace FlatBread.Session
         internal SocketMode Mode { get; set; }
 
         /// <summary>
-        /// 连接运行时
+        /// 是否在进行连接中
         /// </summary>
         internal bool Connecting { get; set; }
 
@@ -94,19 +94,18 @@ namespace FlatBread.Session
         {
             ShakeHandEvent.SendEventArgs.Encode(message);
 
-            Console.WriteLine("Connecting:" + Connecting);
             /*连接中所有的发送操作全进入队列排队*/
             if (Connecting)
             {
-                NoSuccessMessage.Enqueue(message);
+                NoSuccessMessage.Enqueue(ShakeHandEvent.SendEventArgs.MemoryBuffer.ToArray());
             }
             /*
-             * 服务端关闭后会保留一次通道
+             * 服务端关闭后会 只有重新发送一次才会知道通道是否关闭
              * 之后通道就会关闭为NULL
              */
             else if (Channel == null)
             {
-                NoSuccessMessage.Enqueue(message);
+                NoSuccessMessage.Enqueue(ShakeHandEvent.SendEventArgs.MemoryBuffer.ToArray());
                 ShakeHandEvent.ConnectAction();
             }
             /*

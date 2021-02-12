@@ -164,12 +164,6 @@ namespace FlatBread.Tcp
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void StartReceive(UserTokenSession UserToken)
-        {
-
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void AsyncDispatchCenter(object sender, SocketAsyncEventArgs e)
         {
             switch (e.LastOperation)

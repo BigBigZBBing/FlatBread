@@ -16,29 +16,8 @@ using System.Threading.Tasks;
 
 namespace FlatBread.Tcp
 {
-    public class TcpClient
+    public partial class TcpClient
     {
-        /// <summary>
-        /// 用户的名称
-        /// </summary>
-        public string UserName { get; set; }
-
-        /// <summary>
-        /// 服务地址
-        /// </summary>
-        public string Host { get; set; }
-
-        /// <summary>
-        /// 端口
-        /// </summary>
-        public int Port { get; set; }
-
-        /// <summary>
-        /// 地址族
-        /// <para>默认为IPV4</para>
-        /// </summary>
-        public AddressFamily AddressFamily { get; set; } = AddressFamily.InterNetwork;
-
         /// <summary>
         /// 缓冲位大小
         /// </summary>
@@ -104,10 +83,10 @@ namespace FlatBread.Tcp
         public void StartConnect()
         {
             Client = new Socket(AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            //优先初始化用户信息
+            //设置连接地址
             ShakeHandEvent.RemoteEndPoint = GetEndPoint();
             UserTokenSession Session = (UserTokenSession)ShakeHandEvent.UserToken;
-            Console.WriteLine("Connecting.......!ConnectState:" + Session.Connecting);
+            Console.WriteLine("进行连接....是否处于正在连接中:" + Session.Connecting);
             Session.Connecting = true;
             if (!Client.ConnectAsync(ShakeHandEvent))
             {
@@ -156,7 +135,7 @@ namespace FlatBread.Tcp
                     while (Session.NoSuccessMessage.Count > 0)
                     {
                         if (Session.NoSuccessMessage.TryDequeue(out var message))
-                            Session.SendMessage(message);
+                            Session.Channel.Send(message);
                     }
                     break;
                 case SocketError.ConnectionRefused:

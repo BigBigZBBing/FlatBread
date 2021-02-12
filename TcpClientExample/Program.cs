@@ -23,23 +23,23 @@ namespace TcpClientExample
                 Random random = new Random();
 
                 //手动
-                //while (true)
-                //{
-                //    Console.ReadLine();
-                //    string text = randomChinese.GetRandomChinese(random.Next(1, 200));
-                //    byte[] message = Encoding.UTF8.GetBytes(text);
-                //    Console.WriteLine($"发送内容长度:{message.Length}");
-                //    session.SendMessage(message);
-                //}
-
-                //自动
                 while (true)
                 {
-                    string text = randomChinese.GetRandomChinese(random.Next(1, 200));
+                    Console.ReadLine();
+                    string text = randomChinese.GetRandomChinese(random.Next(1, 10000));
                     byte[] message = Encoding.UTF8.GetBytes(text);
+                    Console.WriteLine($"发送内容长度:{message.Length}");
                     session.SendMessage(message);
-                    Thread.Sleep(100);
                 }
+
+                //自动
+                //while (true)
+                //{
+                //    string text = randomChinese.GetRandomChinese(random.Next(1, 200));
+                //    byte[] message = Encoding.UTF8.GetBytes(text);
+                //    session.SendMessage(message);
+                //    Thread.Sleep(100);
+                //}
 
             };
 
