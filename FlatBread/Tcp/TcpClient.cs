@@ -16,32 +16,48 @@ using System.Threading.Tasks;
 
 namespace FlatBread.Tcp
 {
-    public partial class TcpClient
+    public class TcpClient
     {
+        /// <summary>
+        /// 用户的名称
+        /// </summary>
+        public string UserName { get; set; }
+
+        /// <summary>
+        /// 服务地址
+        /// </summary>
+        public string Host { get; set; }
+
+        /// <summary>
+        /// 端口
+        /// </summary>
+        public int Port { get; set; }
+
+        /// <summary>
+        /// 地址族
+        /// <para>默认为IPV4</para>
+        /// </summary>
+        public AddressFamily AddressFamily { get; set; } = AddressFamily.InterNetwork;
+
         /// <summary>
         /// 缓冲位大小
         /// </summary>
-        internal int BufferSize { get; set; } = 4096;
-
-        /// <summary>
-        /// 发送使用的缓冲位
-        /// </summary>
-        internal byte[] SendBuffer { get; set; }
+        int BufferSize { get; set; } = 4096;
 
         /// <summary>
         /// 接收使用的缓冲位
         /// </summary>
-        internal Memory<byte> ReceiveBuffer { get; set; }
+        Memory<byte> ReceiveBuffer { get; set; }
 
         /// <summary>
         /// 握手使用的接套字
         /// </summary>
-        internal ShakeHandEventArgs ShakeHandEvent { get; set; }
+        ShakeHandEventArgs ShakeHandEvent { get; set; }
 
         /// <summary>
         /// 客户端Socket
         /// </summary>
-        internal Socket Client { get; set; }
+        Socket Client { get; set; }
 
         public TcpClient(string host, int port)
         {
@@ -50,7 +66,6 @@ namespace FlatBread.Tcp
 
             UserTokenSession Session = new UserTokenSession();
             //初始化发送接套字
-            SendBuffer = new byte[BufferSize];
             SendEventArgs SendEvent = new SendEventArgs();
             SendEvent.Completed += AsyncDispatchCenter;
             SendEvent.UserToken = Session;

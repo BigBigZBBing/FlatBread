@@ -110,7 +110,7 @@ namespace FlatBread.Session
             }
             /*
              * 同步方案 但是这样做不到更高性能的发送 则先放弃使用
-             * 异步方案 虽能达到发送的最高性能 但是过快会导致SAEA的被占用 后期使用SAEA轮替方案解决(暂时未解决)
+             * 异步方案 虽能达到发送的最高性能 但是过快会导致SAEA的被占用 {后期使用SAEA轮替方案解决(暂时未解决)}
              * Channel.Send(ShakeHandEvent.SendEventArgs.MemoryBuffer.Span);
             */
             else if (!Channel.SendAsync(ShakeHandEvent.SendEventArgs))

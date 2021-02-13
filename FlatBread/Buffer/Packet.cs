@@ -33,7 +33,7 @@ namespace FlatBread.Buffer
         /// <summary>
         /// 包头缓存
         /// </summary>
-        byte[] HeadCache { get; set; }
+        Memory<byte> HeadCache { get; set; }
 
         /// <summary>
         /// 包体是否完整
@@ -66,25 +66,25 @@ namespace FlatBread.Buffer
         /// <summary>
         /// 加载包头
         /// </summary>
-        /// <param name="stream"></param>
+        /// <param name="tmpStream"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal int LoadHead(Span<byte> stream)
         {
+            Span<byte> tmpStream = stream;
             int Offset = 0;
             //如果包头不完整
-            if (!HasHeader && stream.Length > 0)
+            if (!HasHeader && tmpStream.Length > 0)
             {
                 //如果大于-1 说明包头未加载完成
                 if (HeadTargetLength > -1)
                 {
                     //可以读完包头
-                    if (stream.Length >= (HeadTargetLength - HeadCurrentLength))
+                    if (tmpStream.Length >= (HeadTargetLength - HeadCurrentLength))
                     {
-                        stream.Slice(0, HeadTargetLength - HeadCurrentLength).ToArray().CopyTo(HeadCache, 1);
+                        tmpStream.Slice(0, HeadTargetLength - HeadCurrentLength).CopyTo(HeadCache.Slice(HeadCurrentLength).Span);
                         HeadCurrentLength = HeadTargetLength;
-                        //获取包体长度
-                        var lengthBit = HeadCache.AsSpan(1);
+                        Span<byte> lengthBit = HeadCache.Slice(1).Span;
                         Offset += lengthBit.Length;
                         switch (lengthBit.Length)
                         {
@@ -96,16 +96,16 @@ namespace FlatBread.Buffer
                     }
                     else
                     {
-                        stream.Slice(0, stream.Length).ToArray().CopyTo(HeadCache, HeadCurrentLength);
-                        HeadCurrentLength += stream.Length;
-                        Offset += stream.Length;
+                        tmpStream.Slice(0, tmpStream.Length).CopyTo(HeadCache.Slice(HeadCurrentLength).Span);
+                        HeadCurrentLength += tmpStream.Length;
+                        Offset += tmpStream.Length;
                     }
                 }
                 //包头未加载过首先获取包头类型
                 else
                 {
                     //创建包头缓存
-                    var packetType = stream[0];
+                    var packetType = tmpStream[0];
                     switch (packetType)
                     {
                         case 1: //byte 1字节
@@ -123,12 +123,12 @@ namespace FlatBread.Buffer
                     HeadCache = new byte[HeadTargetLength];
                     Mode = (MessageMode)packetType;
                     //优先加载封包类型
-                    HeadCache[0] = packetType;
+                    HeadCache.Span[0] = packetType;
                     HeadCurrentLength = 1;
                     Offset += 1;
                     //递归执行未加载完成的问题
-                    if (stream.Length > 1)
-                        Offset += LoadHead(stream.Slice(1));
+                    if (tmpStream.Length > 1)
+                        Offset += LoadHead(tmpStream.Slice(1));
                 }
             }
             return Offset;
@@ -137,12 +137,14 @@ namespace FlatBread.Buffer
         /// <summary>
         /// 加载包体
         /// </summary>
-        /// <param name="stream"></param>
+        /// <param name="tmpStream"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal int LoadBody(Span<byte> stream)
         {
+            Span<byte> tmpStream = stream;
             int Offset = 0;
-            if (!HasBody && stream.Length > 0)
+            if (!HasBody && tmpStream.Length > 0)
             {
                 //初始化包体
                 if (PacketContent.IsEmpty)
@@ -150,17 +152,17 @@ namespace FlatBread.Buffer
 
                 //可以一次性读完
                 var residue = BodyTargetLength - BodyCurrentLength;
-                if (stream.Length >= residue)
+                if (tmpStream.Length >= residue)
                 {
-                    stream.Slice(0, residue).CopyTo(PacketContent.Slice(BodyCurrentLength).Span);
+                    tmpStream.Slice(0, residue).CopyTo(PacketContent.Slice(BodyCurrentLength).Span);
                     BodyCurrentLength = BodyTargetLength;
                     Offset += residue;
                 }
                 else
                 {
-                    stream.Slice(0, stream.Length).CopyTo(PacketContent.Slice(BodyCurrentLength).Span);
-                    BodyCurrentLength += stream.Length;
-                    Offset += stream.Length;
+                    tmpStream.Slice(0, tmpStream.Length).CopyTo(PacketContent.Slice(BodyCurrentLength).Span);
+                    BodyCurrentLength += tmpStream.Length;
+                    Offset += tmpStream.Length;
                 }
             }
             return Offset;

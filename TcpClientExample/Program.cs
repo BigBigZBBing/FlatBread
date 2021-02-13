@@ -21,32 +21,37 @@ namespace TcpClientExample
             tcpClient.OnConnect = (session) =>
             {
                 Random random = new Random();
+                byte[] response;
+
+                tcpClient.OnCallBack = (user, packet) =>
+                {
+                    response = packet;
+                    Console.WriteLine("返回内容:" + Encoding.UTF8.GetString(response)); ;
+                };
 
                 //手动
-                while (true)
-                {
-                    Console.ReadLine();
-                    string text = randomChinese.GetRandomChinese(random.Next(1, 10000));
-                    byte[] message = Encoding.UTF8.GetBytes(text);
-                    Console.WriteLine($"发送内容长度:{message.Length}");
-                    session.SendMessage(message);
-                }
-
-                //自动
                 //while (true)
                 //{
-                //    string text = randomChinese.GetRandomChinese(random.Next(1, 200));
+                //    Console.ReadLine();
+                //    string text = randomChinese.GetRandomChinese(random.Next(1, 10000));
                 //    byte[] message = Encoding.UTF8.GetBytes(text);
+                //    Console.WriteLine($"发送内容长度:{message.Length}");
                 //    session.SendMessage(message);
-                //    Thread.Sleep(100);
                 //}
 
+                //自动
+                while (true)
+                {
+                    string text = randomChinese.GetRandomChinese(random.Next(1, 200));
+                    byte[] message = Encoding.UTF8.GetBytes(text);
+                    session.SendMessage(message);
+                    //发送快过头了....设置一下间隔
+                    Thread.Sleep(1);
+                }
+
             };
 
-            tcpClient.OnCallBack = (user, packet) =>
-            {
-                Console.WriteLine("返回内容:" + Encoding.UTF8.GetString(packet)); ;
-            };
+
 
             Thread.Sleep(-1);
         }
